@@ -1,0 +1,38 @@
+# Non-secret runtime configuration for the guardrail serving API.
+# ${VAR} / ${VAR:-default} are interpolated from the environment at load time.
+# /v1/predict is unauthenticated by design — this service has no secrets.
+
+service:
+  name: ms-bribrain-ocr-nilam-guardrail-statement
+  version: "1.0.0"
+  port: ${PORT:-8090}
+  environment: ${APP_ENVIRO:-cloud}
+
+model:
+  # Where the artifact lands locally after being fetched from GCS. Excluded
+  # from the image by .dockerignore — the container downloads it at startup.
+  local_path: ${MODEL_LOCAL_PATH:-src/models/artifacts/probe_efficientnet_b0_logreg.joblib}
+  backbone: ${MODEL_BACKBONE:-efficientnet_b0}
+  # P(reject) at or above this is a reject. 0.5 reproduces the probe's own
+  # argmax exactly, i.e. the numbers reported in EXPERIMENTS.md.
+  threshold: ${DECISION_THRESHOLD:-0.5}
+  # Pages per forward pass. Purely a throughput knob — the backbone is
+  # GAP-pooled and runs under eval(), so batch composition can't change output.
+  embedding_batch_size: ${EMBEDDING_BATCH_SIZE:-16}
+  torch_threads: ${TORCH_NUM_THREADS:-4}
+
+gcs:
+  bucket_name: ${GCS_BUCKET:-gc-bribrain-dev-gcs-ocr-01}
+  object: ${GCS_MODEL_OBJECT:-ocr-nilam/bank-statement/guardrail/models/probe_efficientnet_b0_logreg_latest.joblib}
+
+request:
+  max_upload_mb: ${MAX_UPLOAD_MB:-50}
+  max_pages: ${MAX_PAGES:-100}
+  # Blocking inference runs here so the event loop stays responsive. Keep this
+  # small: each worker holds a full-resolution page in memory, and some scans
+  # decode to ~144MB.
+  inference_workers: ${INFERENCE_WORKERS:-2}
+
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  dir: ${LOG_DIR:-./logs}

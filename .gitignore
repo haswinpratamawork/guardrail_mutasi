@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+data_cache/
+runs/
+*.json
+!configs/*.json
+.env
+*.key
+sa*.json
+logs/
+.pytest_cache/
+.claude/
+src/models/artifacts/
+*.joblib
+*.pt

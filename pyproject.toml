@@ -1,0 +1,76 @@
+[project]
+name = "guardrail-statement"
+version = "1.0.0"
+description = "Approve/reject guardrail for scanned bank-statement pages (mutasi rekening)"
+readme = "README.md"
+# 3.12 rather than the house 3.11.6: the model artifact is pickled by the
+# training venv on 3.12, and keeping fit and serve on one interpreter removes a
+# whole class of unpickling surprises. Everything else follows house convention.
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    # --- serving ---
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.9",
+    "python-dotenv>=1.0",
+    "pydantic>=2.9",
+    "pyyaml>=6.0.1",
+    "google-cloud-storage>=2.16.0",
+
+    # --- inference ---
+    # Pinned to the versions that produced the artifact. scikit-learn especially:
+    # unpickling an estimator across versions is not guaranteed, and load_probe
+    # warns when the running version differs from the one recorded in the bundle.
+    "scikit-learn==1.9.0",
+    "numpy==2.5.2",
+    "scipy==1.18.0",
+    "joblib==1.5.3",
+    "timm==1.0.28",
+    "torch==2.13.0",
+    "torchvision==0.28.0",
+    "pillow==12.3.0",
+    "pypdfium2==5.13.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    # Only the tests need pikepdf — it builds the encrypted PDF used to prove
+    # the service refuses password-protected input.
+    "pikepdf>=9.0.0",
+]
+dev = ["ruff", "mypy"]
+
+# CPU-only torch. The probe is a frozen 5M-parameter CNN plus a logistic
+# regression; a GPU buys nothing here and the CUDA wheels weigh ~5 GB.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+ignore_missing_imports = true

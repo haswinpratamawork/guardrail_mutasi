@@ -1,0 +1,32 @@
+# Model weights are downloaded from GCS at startup — never bake them in.
+# (Same rule the sibling services on this host enforce.)
+*.joblib
+*.pt
+*.pth
+*.safetensors
+src/models/artifacts/
+
+# Training data and experiment output: large, local-only, irrelevant to serving.
+data_cache/
+runs/
+logs/
+
+# Environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Secrets
+.env
+*.key
+sa*.json
+
+# Repo noise
+.git/
+.gitignore
+.claude/
+*.md
+!README.md

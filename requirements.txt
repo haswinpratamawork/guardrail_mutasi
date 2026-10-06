@@ -1,0 +1,24 @@
+# GCS + Secret Manager access
+google-cloud-storage>=2.16.0
+google-cloud-secret-manager>=2.20.0
+
+# PDF decrypt + rasterize (chosen over PyMuPDF to avoid AGPL licensing)
+pikepdf>=9.0.0
+pypdfium2>=4.30.0
+
+# Data handling
+pandas>=2.2.0
+pyarrow>=16.0.0
+scikit-learn>=1.5.0
+Pillow>=10.3.0
+
+# Modeling
+torch>=2.3.0
+torchvision>=0.18.0
+transformers>=4.42.0
+timm>=1.0.7
+xgboost>=2.1.0
+
+# Utilities
+pyyaml>=6.0.1
+tqdm>=4.66.0
